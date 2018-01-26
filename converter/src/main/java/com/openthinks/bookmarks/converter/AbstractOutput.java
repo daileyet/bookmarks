@@ -8,14 +8,25 @@ package com.openthinks.bookmarks.converter;
  *
  */
 public class AbstractOutput implements Output {
+	protected String pureOutput;
+	
+	public AbstractOutput() {
+		super();
+	}
+
+
+	public AbstractOutput(String pureOutput) {
+		super();
+		this.pureOutput = pureOutput;
+	}
+
 
 	/* (non-Javadoc)
 	 * @see com.openthinks.bookmarks.converter.Output#asText()
 	 */
 	@Override
 	public String asText() {
-		// TODO Auto-generated method stub
-		return null;
+		return pureOutput;
 	}
 
 }

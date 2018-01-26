@@ -55,8 +55,8 @@
 		</dependency>
 		<dependency>
 			<groupId>com.openthinks.libs</groupId>
-			<artifactId>utilities</artifactId>
-			<version>1.2</version>
+			<artifactId>openlibs.utilities</artifactId>
+			<version>1.2.1</version>
 		</dependency>
 	</dependencies>
 

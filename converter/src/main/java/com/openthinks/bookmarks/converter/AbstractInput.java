@@ -14,12 +14,8 @@ import java.io.InputStreamReader;
  * @author dailey.yet@outlook.com
  *
  */
-public class AbstractInput implements Input {
+public abstract class AbstractInput implements Input {
 	private final StringBuffer content = new StringBuffer();
-
-	public AbstractInput() {
-
-	}
 
 	public AbstractInput(String strInput) {
 		content.append(strInput);
