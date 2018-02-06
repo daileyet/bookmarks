@@ -15,9 +15,9 @@ public class JsonOutput extends AbstractOutput {
 
 	protected final JSONElement jsonElement;
 
-	public JsonOutput(JSONElement root) {
-		this.jsonElement = root;
-		pureOutput = JSON.stringify(jsonElement);
+	public JsonOutput(String jsonStr) {
+		pureOutput = jsonStr;
+		this.jsonElement = JSON.parse(pureOutput);
 	}
 
 	public final JSONElement getJsonElement() {

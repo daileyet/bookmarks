@@ -5,15 +5,13 @@ package com.openthinks.bookmarks.converter.json;
 
 import com.openthinks.bookmarks.converter.Converter;
 import com.openthinks.bookmarks.converter.Input;
-import com.openthinks.bookmarks.converter.Output;
 import com.openthinks.libs.utilities.Checker;
-import com.openthinks.libs.utilities.json.JSON;
 
 /**
  * @author dailey.yet@outlook.com
  *
  */
-public class JsonConverter implements Converter {
+public class JsonConverter implements Converter<JsonOutput> {
 
 	/*
 	 * (non-Javadoc)
@@ -23,12 +21,12 @@ public class JsonConverter implements Converter {
 	 * .converter.Input)
 	 */
 	@Override
-	public Output convert(Input input) {
+	public JsonOutput convert(Input input) {
 		Checker.require(input).notNull();
 		if (input.isEmpty()) {
 			throw new IllegalArgumentException();
 		}
-		return new JsonOutput(JSON.parse(input.asText()));
+		return new JsonOutput(input.asText());
 	}
 
 }

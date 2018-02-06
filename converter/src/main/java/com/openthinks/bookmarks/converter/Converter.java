@@ -7,8 +7,8 @@ package com.openthinks.bookmarks.converter;
  * @author dailey.yet@outlook.com
  *
  */
-public interface Converter {
+public interface Converter<T extends Output> {
 
-	Output convert(Input input);
+	T convert(Input input);
 
 }
