@@ -3,55 +3,30 @@
  */
 package com.openthinks.bookmarks.core.model;
 
+import com.openthinks.libs.utilities.json.JSONObject;
+
 /**
  * @author dailey.yet@outlook.com
  *
  */
-public class BookmarkContainer implements GUID {
-	private String guid;
-	private String title;
-	private long dateAdded;
-	private long lastModified;
-	
-	public BookmarkContainer() {
+public final class BookmarkContainer {
+
+
+	public Bookmark addBookmark(JSONObject jsonObject,TypeCode typeCode) {
+		Bookmark bookmark = new Bookmark();
+		bookmark.setIndex(jsonObject.getProperty("index", Integer.class));
+		bookmark.setGuid(jsonObject.getProperty("guid", String.class));
+		bookmark.setTitle(jsonObject.getProperty("title", String.class));
+		bookmark.setDateAdded(jsonObject.getProperty("dateAdded", Long.class));
+		bookmark.setLastModified(jsonObject.getProperty("lastModified", Long.class));
+		bookmark.setDescription(jsonObject.getProperty("description", String.class));
+		if(typeCode==TypeCode.LEAF) {
+			bookmark.setUri(jsonObject.getProperty("uri", String.class));
+			bookmark.setIconuri(jsonObject.getProperty("iconuri", String.class));
+		}else {
+			
+		}
+		return bookmark;
 	}
 
-	@Override
-	public String guid() {
-		return guid;
-	}
-
-	public String getGuid() {
-		return guid;
-	}
-
-	public void setGuid(String guid) {
-		this.guid = guid;
-	}
-
-	public String getTitle() {
-		return title;
-	}
-
-	public void setTitle(String title) {
-		this.title = title;
-	}
-
-	public long getDateAdded() {
-		return dateAdded;
-	}
-
-	public void setDateAdded(long dateAdded) {
-		this.dateAdded = dateAdded;
-	}
-
-	public long getLastModified() {
-		return lastModified;
-	}
-
-	public void setLastModified(long lastModified) {
-		this.lastModified = lastModified;
-	}
-	
-	
 }

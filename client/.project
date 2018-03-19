@@ -3,7 +3,7 @@
   <name>client</name>
   <comment>Bookmarker is useful bookmark tool utilities. NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse.</comment>
   <projects>
-    <project>openlibs.binder</project>
+    <project>converter</project>
     <project>openlibs.utilities</project>
   </projects>
   <buildSpec>

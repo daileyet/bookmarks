@@ -12,7 +12,7 @@ import com.openthinks.bookmarks.converter.Output;
 public class JsonConverterTest {
 
 	
-//	@Test
+	@Test
 	public void testParseJSonString() throws IOException {
 		Converter c = new JsonConverter();
 		Output output = c.convert(new JsonInput(JsonConverterTest.class.getResourceAsStream("/bookmarks-2018-01-26.json")));
@@ -24,7 +24,7 @@ public class JsonConverterTest {
 		Assert.assertEquals(true, actual);
 	}
 	
-	@Test
+//	@Test
 	public void testParseJSonString2() throws IOException {
 		Converter c = new JsonConverter();
 		Output output = c.convert(new JsonInput(JsonConverterTest.class.getResourceAsStream("/bookmarks-2018-01-26.min.json")));

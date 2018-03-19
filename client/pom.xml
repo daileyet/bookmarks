@@ -15,25 +15,50 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<mapdb.version>3.0.5</mapdb.version>
-		<binder.version>1.0</binder.version>		
+		<binder.version>1.0</binder.version>
+		<thymeleaf.version>3.0.9.RELEASE</thymeleaf.version>
+		<swt.version>4.6.1</swt.version>
 	</properties>
 
 	<dependencies>
+	<dependency>
+			<groupId>com.openthinks</groupId>
+			<artifactId>converter</artifactId>
+			<version>${parent.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.mapdb</groupId>
 			<artifactId>mapdb</artifactId>
 			<version>${mapdb.version}</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
 		<dependency>
-			<groupId>com.openthinks.libs</groupId>
-			<artifactId>openlibs.binder</artifactId>
-			<version>${binder.version}</version>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.4</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.thymeleaf</groupId>
+			<artifactId>thymeleaf</artifactId>
+			<version>${thymeleaf.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.swt</groupId>
+			<artifactId>org.eclipse.swt.win32.win32.x86_64</artifactId>
+			<version>${swt.version}</version>
 		</dependency>
 	</dependencies>
-
 	<build>
 		<plugins>
 
 		</plugins>
 	</build>
+	<repositories>
+        <repository>
+            <id>maven-eclipse-repo</id>
+            <url>http://maven-eclipse.github.io/maven</url>
+        </repository>
+    </repositories>
 </project>
