@@ -20,6 +20,8 @@ public class Bookmark implements GUID {
 	private String parent;
 	// 同级中的顺序
 	private int index;
+	//是否展开
+	private boolean expand;
 
 	@Override
 	public String guid() {
@@ -97,9 +99,53 @@ public class Bookmark implements GUID {
 	public void setIndex(int index) {
 		this.index = index;
 	}
+	
+	public boolean isExpand() {
+		return expand;
+	}
+	
+	public void setExpand(boolean expand) {
+		this.expand = expand;
+	}
 
 	public boolean isBranch() {
 		return uri == null;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((guid == null) ? 0 : guid.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!GUID.class.isInstance(obj))
+			return false;
+		GUID other = (GUID) obj;
+		if (guid() == null) {
+			if (other.guid() != null)
+				return false;
+		} else if (!guid().equals(other.guid()))
+			return false;
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		if (isBranch())
+			return "Bookmark [guid=" + guid + ", title=" + title + ", dateAdded=" + dateAdded + ", lastModified="
+					+ lastModified + ", description=" + description + ", parent=" + parent + ", index=" + index + ", expand="+ expand+ "]";
+		else
+			return "Bookmark [guid=" + guid + ", title=" + title + ", dateAdded=" + dateAdded + ", lastModified="
+					+ lastModified + ", uri=" + uri + ", iconuri=" + iconuri + ", description=" + description
+					+ ", parent=" + parent + ", index=" + index + "]";
 	}
 
 }

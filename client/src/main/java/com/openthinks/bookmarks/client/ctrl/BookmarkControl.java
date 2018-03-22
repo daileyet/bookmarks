@@ -3,6 +3,8 @@
  */
 package com.openthinks.bookmarks.client.ctrl;
 
+import java.util.Map;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -13,24 +15,24 @@ import org.eclipse.swt.widgets.TreeItem;
 
 import com.openthinks.bookmarks.client.Configs;
 import com.openthinks.bookmarks.client.db.DBHelper;
-import com.openthinks.bookmarks.core.model.nosql.Bookmark;
-import com.openthinks.bookmarks.core.model.nosql.BookmarkContainer;
-import com.openthinks.bookmarks.core.model.nosql.OrderGUID;
+import com.openthinks.bookmarks.core.model.Bookmark;
+import com.openthinks.bookmarks.core.model.BookmarkContainer;
 import com.openthinks.libs.utilities.logger.ProcessLogger;
 
 /**
  * @author dailey.yet@outlook.com
  *
  */
-final class BookmarkControl {
+final class BookmarkControl implements UIControl {
 	private Tree treeBookmark;
 	private Text textLocation;
 	private Browser browser;
-	private DBHelper dbHelper;
+	private final DBHelper dbHelper;
 	private final String BM_HTML_TEMPLATE;
+	private Map<String, BookmarkContainer> bmcMap;
 
-	public BookmarkControl() {
-		dbHelper = new DBHelper();
+	public BookmarkControl(DBHelper dbHelper) {
+		this.dbHelper = dbHelper;
 		BM_HTML_TEMPLATE = loadTemplate();
 	}
 
@@ -50,35 +52,45 @@ final class BookmarkControl {
 		this.browser = browser;
 	}
 
-	void init() {
+	public void init() {
 		initialBookmarkTree();
 		initilaEventListeners();
 	}
 
+	@Override
+	public void release() {
+		if (bmcMap != null) {
+			bmcMap.entrySet().forEach((entry) -> {
+				dbHelper.save(entry.getKey(), entry.getValue());
+				BookmarkContainer bmc = entry.getValue();
+				Bookmark bm = bmc.getTopBookmark();
+				bmc.getChildren(bm).forEach(child -> ProcessLogger.debug(child.toString()));
+			});
+		}
+
+	}
+
 	private void initialBookmarkTree() {
-		dbHelper.find().ifPresent((bmc) -> {
-			TreeItem root = new TreeItem(treeBookmark, SWT.NONE);
-			root.setText(Configs.MAIN_BOOKMARK_KEY);
-			buildTree(root, bmc);
+		bmcMap = dbHelper.findAll();
+		bmcMap.forEach((name, bmc) -> {
+			TreeItem top = new TreeItem(treeBookmark, SWT.NONE);
+			top.setText(name);
+			top.setExpanded(true);
+			Bookmark bm = bmc.getTopBookmark();
+			buildTree(bmc, top, bm);
 		});
 	}
 
-	private void buildTree(TreeItem parent, OrderGUID model) {
-		TreeItem self = new TreeItem(parent,SWT.NONE);
-		self.setData(model);
-		if (model instanceof BookmarkContainer) {
-			BookmarkContainer bmc = (BookmarkContainer) model;
-			String name = bmc.getTitle();
-			name = name == null || name.equals("") ? bmc.getGuid() : name;
-			self.setText(name);
-			bmc.getChildren().forEach((child) -> {
-				buildTree(self, child);
-			});
-		} else {
-			Bookmark bm = (Bookmark) model;
-			self.setText(bm.getTitle());
-		}
-
+	private void buildTree(final BookmarkContainer bmc, TreeItem parent, Bookmark bm) {
+		TreeItem childTreeItem = new TreeItem(parent, SWT.NONE);
+		childTreeItem.setData(bm);
+		String name = bm.getTitle();
+		name = name == null || name.equals("") ? bm.getGuid() : name;
+		childTreeItem.setText(name);
+		childTreeItem.setExpanded(bm.isExpand());
+		bmc.getChildren(bm).forEach((childBm) -> {
+			buildTree(bmc, childTreeItem, childBm);
+		});
 	}
 
 	private void initilaEventListeners() {
@@ -92,47 +104,67 @@ final class BookmarkControl {
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {// double click
 				TreeItem treeItem = (TreeItem) e.item;
-				OrderGUID model = (OrderGUID) treeItem.getData();
-				if (model instanceof Bookmark) {
-					Bookmark bm = (Bookmark) model;
+				if (treeItem.getItemCount() > 0) {
+					textLocation.setText("");
+					ProcessLogger.debug("Double-click node:{0}", treeItem.getData());
+				} else {
+					Bookmark bm = (Bookmark) treeItem.getData();
 					textLocation.setText(bm.getUri());
 					browser.setUrl(bm.getUri());
-					browser.setText(outputHtml(model));
-				} else {
-					textLocation.setText("");
-					expandTree(treeItem);
+					browser.setText(outputHtml(bm));
 				}
 			}
 		});
-		
+
+		treeBookmark.addListener(SWT.Expand, (event) -> {
+			if (TreeItem.class.isInstance(event.item))
+				return;
+			TreeItem treeItem = (TreeItem) event.item;
+			Bookmark bm = (Bookmark) treeItem.getData();
+			if (bm != null) {
+				bm.setExpand(true);
+			}
+		});
+
+		treeBookmark.addListener(SWT.Collapse, (event) -> {
+			if (TreeItem.class.isInstance(event.item))
+				return;
+			TreeItem treeItem = (TreeItem) event.item;
+			Bookmark bm = (Bookmark) treeItem.getData();
+			if (bm != null) {
+				bm.setExpand(false);
+			}
+		});
 	}
 
-	private void expandTree(TreeItem branch) {
-		TreeItem[] treeItems = branch.getItems();
-		if(treeItems!=null) {
-			for(TreeItem treeItem : treeItems) {
-				treeItem.setExpanded(true);
-				expandTree(treeItem);
-			}
-		}
-	}
-	
-	private String outputHtml(OrderGUID model) {
+	// private void expandTree(TreeItem branch, boolean recursion) {
+	// if (branch == null)
+	// return;
+	// TreeItem[] treeItems = branch.getItems();
+	// if (treeItems != null) {
+	// for (TreeItem treeItem : treeItems) {
+	// if (treeItem.getItemCount() == 0)
+	// continue;
+	// treeItem.setExpanded(true);
+	// Bookmark bm = (Bookmark) treeItem.getData();
+	// if (bm != null) {
+	// bm.setExpand(true);
+	// }
+	// if (recursion)
+	// expandTree(treeItem, recursion);
+	// }
+	// }
+	// }
+
+	private String outputHtml(Bookmark model) {
 		String guid = "";
 		String title = "";
 		long dateAdded = 0;
 		long lastModified = 0;
-		if (model instanceof BookmarkContainer) {
-			guid = ((BookmarkContainer) model).getGuid();
-			title = ((BookmarkContainer) model).getTitle();
-			dateAdded = ((BookmarkContainer) model).getDateAdded();
-			lastModified = ((BookmarkContainer) model).getLastModified();
-		} else if (model instanceof Bookmark) {
-			guid = ((Bookmark) model).getGuid();
-			title = ((Bookmark) model).getTitle();
-			dateAdded = ((Bookmark) model).getDateAdded();
-			lastModified = ((Bookmark) model).getLastModified();
-		}
+		guid = model.getGuid();
+		title = model.getTitle();
+		dateAdded = model.getDateAdded();
+		lastModified = model.getLastModified();
 		String ret = BM_HTML_TEMPLATE.replace("${guid}", guid).replace("${title}", title)
 				.replace("${dateAdded}", String.valueOf(dateAdded))
 				.replace("${lastModified}", String.valueOf(lastModified));

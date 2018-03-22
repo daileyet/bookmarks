@@ -6,6 +6,7 @@ package com.openthinks.bookmarks.core;
 import java.beans.IntrospectionException;
 
 import com.openthinks.bookmarks.converter.json.JsonOutput;
+import com.openthinks.bookmarks.core.model.Bookmark;
 import com.openthinks.bookmarks.core.model.BookmarkContainer;
 import com.openthinks.bookmarks.core.model.TypeCode;
 import com.openthinks.libs.utilities.Checker;
@@ -26,23 +27,24 @@ public final class ModelUtils {
 		BookmarkContainer container = new BookmarkContainer();
 		JSONElement jsonRoot = output.getJsonElement();
 		if (jsonRoot.isObject()) {
-			processToNosql(container, jsonRoot.asObject());
+			processToNosql(container, jsonRoot.asObject(), null);
 		} else {
 			throw new UnsupportedOperationException("Not support convert json array as root");
 		}
 		return container;
 	}
 
-	private static void processToNosql(BookmarkContainer container, JSONObject jsonObject) throws IntrospectionException {
+	private static void processToNosql(BookmarkContainer container, JSONObject jsonObject, Bookmark parent)
+			throws IntrospectionException {
 		TypeCode actualTypeCode = TypeCode.toTypeCode(jsonObject.getProperty("typeCode", Integer.class));
-		container.addBookmark(jsonObject,actualTypeCode);
+		Bookmark bookmark = container.addBookmark(parent, jsonObject, actualTypeCode);
 		switch (actualTypeCode) {
 		case BRANCH:
 			JSONArray jsonArray = jsonObject.getProperty("children", JSONArray.class);
 			if (jsonArray != null) {
 				for (Object child : jsonArray) {
 					JSONObject jsonChild = (JSONObject) child;
-					processToNosql(container, jsonChild);
+					processToNosql(container, jsonChild, bookmark);
 				}
 			}
 			break;
@@ -50,6 +52,5 @@ public final class ModelUtils {
 			break;
 		}
 	}
-	
 
 }

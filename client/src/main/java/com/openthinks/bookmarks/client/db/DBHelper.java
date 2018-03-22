@@ -3,19 +3,14 @@
  */
 package com.openthinks.bookmarks.client.db;
 
-import java.beans.IntrospectionException;
-import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 import org.mapdb.Serializer;
 
 import com.openthinks.bookmarks.client.Configs;
-import com.openthinks.bookmarks.converter.json.JsonConverter;
-import com.openthinks.bookmarks.converter.json.JsonConverterTest;
-import com.openthinks.bookmarks.converter.json.JsonInput;
-import com.openthinks.bookmarks.core.ModelUtils;
-import com.openthinks.bookmarks.core.model.nosql.BookmarkContainer;
+import com.openthinks.bookmarks.core.model.BookmarkContainer;
 
 /**
  * @author dailey.yet@outlook.com
@@ -32,29 +27,33 @@ public final class DBHelper {
 				.createOrOpen();
 	}
 
-	public Optional<BookmarkContainer> find() {
+	public Map<String, BookmarkContainer> findAll() {
+		Map<String, BookmarkContainer> bmcMapCopy = new HashMap<>();
 		if (bmcMap != null) {
-			BookmarkContainer mainBMC = bmcMap.get(Configs.MAIN_BOOKMARK_KEY);
-			return Optional.ofNullable(mainBMC);
+			bmcMap.keySet().forEach((bookmarkNamespace) -> {
+				find(bookmarkNamespace).ifPresent(bmc -> bmcMapCopy.put(bookmarkNamespace, bmc));
+			});
+		}
+		return bmcMapCopy;
+	}
+
+	public Optional<BookmarkContainer> find(String bookmarkNamespace) {
+		if (bmcMap != null) {
+			BookmarkContainer specialBMC = bmcMap.get(bookmarkNamespace);
+			return Optional.ofNullable(specialBMC);
 		}
 		return Optional.empty();
 	}
 
-	public void save(BookmarkContainer bookmarkContainer) {
+	public void save(String bookmarkNamespace, BookmarkContainer bookmarkContainer) {
 		if (bmcMap != null) {
-			bmcMap.put(Configs.MAIN_BOOKMARK_KEY, bookmarkContainer);
+			bmcMap.put(bookmarkNamespace, bookmarkContainer);
 			MapDBHelper.getDiskDB().commit();
 		}
 	}
 
-	public static final void destroy() {
+	public final void destroy() {
 		MapDBHelper.destroy();
-	}
-
-	public static void main(String[] args) throws IntrospectionException, IOException {
-		BookmarkContainer bc = ModelUtils.fromJsonToNosql(new JsonConverter()
-				.convert(new JsonInput(JsonConverterTest.class.getResourceAsStream("/bookmarks-2018-01-26.min.json"))));
-		new DBHelper().save(bc);
 	}
 
 }

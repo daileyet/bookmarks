@@ -3,6 +3,9 @@ package com.openthinks.bookmarks.client;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.ShellEvent;
+import org.eclipse.swt.events.ShellListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -13,9 +16,12 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Tray;
+import org.eclipse.swt.widgets.TrayItem;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.wb.swt.SWTResourceManager;
 
-import com.openthinks.bookmarks.client.ctrl.Controls;
+import com.openthinks.bookmarks.client.ctrl.ControlManager;
 
 public class Bootstrap {
 
@@ -27,6 +33,7 @@ public class Bootstrap {
 	public static void main(String[] args) {
 		Display display = Display.getDefault();
 		Shell shell = new Shell();
+		shell.setImage(SWTResourceManager.getImage(Bootstrap.class, "/image/favicon.ico"));
 		shell.setSize(667, 529);
 		shell.setText("Bookmark Tools");
 		shell.setLayout(new FillLayout(SWT.HORIZONTAL));
@@ -76,7 +83,50 @@ public class Bootstrap {
 		Browser browser = new Browser(composite, SWT.BORDER);
 		browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
-		Controls.newBookmarkControl(treeBookmark,textLocation,browser);
+		ControlManager.INSTANCE.newBookmarkControl(treeBookmark, textLocation, browser);
+		ControlManager.INSTANCE.init();
+		shell.addShellListener(new ShellListener() {
+
+			@Override
+			public void shellIconified(ShellEvent e) {
+
+			}
+
+			@Override
+			public void shellDeiconified(ShellEvent e) {
+
+			}
+
+			@Override
+			public void shellDeactivated(ShellEvent e) {
+
+			}
+
+			@Override
+			public void shellClosed(ShellEvent e) {
+				e.doit=false;
+				//ControlManager.INSTANCE.release();
+				shell.setVisible(false);
+			}
+
+			@Override
+			public void shellActivated(ShellEvent e) {
+
+			}
+		});
+
+		final Tray tray = display.getSystemTray();
+		Image image = new Image(display, 16, 16);
+		if (tray != null) {
+			final TrayItem item = new TrayItem(tray, SWT.NONE);
+			item.setToolTipText("Bookmark Respository");
+			item.addListener(SWT.Show, event -> System.out.println("show"));
+			item.addListener(SWT.Hide, event -> System.out.println("hide"));
+			item.addListener(SWT.Selection, event -> System.out.println("selection"));
+			item.addListener(SWT.DefaultSelection, event -> System.out.println("default selection"));
+			item.setImage(shell.getImage());
+			item.setHighlightImage(image);
+		}
 
 		shell.open();
 		shell.layout();
@@ -85,6 +135,7 @@ public class Bootstrap {
 				display.sleep();
 			}
 		}
+		image.dispose();
 		display.dispose();
 	}
 }
