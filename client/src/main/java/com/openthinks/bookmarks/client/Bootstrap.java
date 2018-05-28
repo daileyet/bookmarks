@@ -3,6 +3,8 @@ package com.openthinks.bookmarks.client;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.events.ShellListener;
 import org.eclipse.swt.graphics.Image;
@@ -114,16 +116,32 @@ public class Bootstrap {
 
 			}
 		});
-
 		final Tray tray = display.getSystemTray();
 		Image image = new Image(display, 16, 16);
 		if (tray != null) {
+			Menu trayMenu = new Menu(shell);
+			MenuItem quitItem = new MenuItem(trayMenu, SWT.PUSH); 
+			quitItem.setText("Quit");
+			quitItem.setImage(SWTResourceManager.getImage(Bootstrap.class, "/image/exit.png"));
+			quitItem.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					ControlManager.INSTANCE.release();
+					tray.dispose();
+					shell.close();
+					System.exit(1);
+				}
+			});
 			final TrayItem item = new TrayItem(tray, SWT.NONE);
 			item.setToolTipText("Bookmark Respository");
 			item.addListener(SWT.Show, event -> System.out.println("show"));
 			item.addListener(SWT.Hide, event -> System.out.println("hide"));
 			item.addListener(SWT.Selection, event -> System.out.println("selection"));
 			item.addListener(SWT.DefaultSelection, event -> System.out.println("default selection"));
+			item.addListener(SWT.MenuDetect,event->{
+				trayMenu.setLocation(display.getCursorLocation());
+				trayMenu.setVisible(true);
+			});
 			item.setImage(shell.getImage());
 			item.setHighlightImage(image);
 		}
